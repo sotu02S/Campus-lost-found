@@ -1,0 +1,30 @@
+{
+  "name": "campus-lost-found",
+  "version": "1.0.0",
+  "description": "Campus Lost & Found App with Admin Panel and Clerk Authentication",
+  "main": "index.html",
+  "type": "module",
+  "scripts": {
+    "dev": "vercel dev",
+    "build": "echo 'No build step required'",
+    "deploy": "vercel --prod"
+  },
+  "keywords": [
+    "lost-and-found",
+    "campus",
+    "clerk",
+    "vercel",
+    "admin-panel"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "dependencies": {
+    "@vercel/postgres": "^0.5.1"
+  },
+  "devDependencies": {
+    "vercel": "^33.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
