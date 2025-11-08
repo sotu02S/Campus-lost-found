@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Campus Lost & Found</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@clerk/clerk-js@latest/dist/clerk.browser.js"></script>
+</head>
+<body>
+    <!-- Sign In Overlay -->
+    <div id="auth-overlay" class="auth-overlay">
+        <div class="auth-container">
+            <div class="auth-logo">
+                <svg width="48" height="48" viewBox="0 0 32 32" fill="none">
+                    <circle cx="16" cy="16" r="14" stroke="currentColor" stroke-width="2"/>
+                    <path d="M16 10V16L20 20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                <h1>Campus Lost & Found</h1>
+                <p>Sign in to post and manage items</p>
+            </div>
+            <div id="clerk-signin"></div>
+        </div>
+    </div>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="logo">
+                <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                    <circle cx="16" cy="16" r="14" stroke="currentColor" stroke-width="2"/>
+                    <path d="M16 10V16L20 20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                <h1>Campus Lost & Found</h1>
+            </div>
+            <nav class="nav">
+                <button class="nav-btn active" data-view="browse">Browse</button>
+                <button class="nav-btn" data-view="my-posts" id="myPostsBtn" style="display: none;">My Posts</button>
+                <button class="btn btn-primary" id="postItemBtn" style="display: none;">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                        <path d="M10 4V16M4 10H16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                    Post Item
+                </button>
+                <button class="btn btn-secondary" id="signInBtn">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                        <circle cx="10" cy="7" r="3" stroke="currentColor" stroke-width="2"/>
+                        <path d="M4 17C4 14 6.5 12 10 12C13.5 12 16 14 16 17" stroke="currentColor" stroke-width="2"/>
+                    </svg>
+                    Sign In
+                </button>
+                <div id="user-button-main" style="display: none;"></div>
+                <a href="admin.html" class="btn btn-secondary" id="adminBtn" style="display: none;">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                        <rect x="3" y="3" width="14" height="14" rx="2" stroke="currentColor" stroke-width="2"/>
+                    </svg>
+                    Admin
+                </a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main">
+        <div class="container">
+            <!-- Search & Filters -->
+            <div class="search-section">
+                <div class="search-bar">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                        <circle cx="9" cy="9" r="6" stroke="currentColor" stroke-width="2"/>
+                        <path d="M14 14L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                    <input type="text" id="searchInput" placeholder="Search for items...">
+                </div>
+                <div class="filters">
+                    <select id="categoryFilter" class="filter-select">
+                        <option value="">All Categories</option>
+                        <option value="electronics">Electronics</option>
+                        <option value="books">Books & Stationery</option>
+                        <option value="clothing">Clothing</option>
+                        <option value="accessories">Accessories</option>
+                        <option value="keys">Keys & Cards</option>
+                        <option value="other">Other</option>
+                    </select>
+                    <select id="typeFilter" class="filter-select">
+                        <option value="">Lost & Found</option>
+                        <option value="lost">Lost Only</option>
+                        <option value="found">Found Only</option>
+                    </select>
+                    <select id="statusFilter" class="filter-select">
+                        <option value="">All Status</option>
+                        <option value="unclaimed">Unclaimed</option>
+                        <option value="claimed">Claimed</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Items Grid -->
+            <div id="itemsGrid" class="items-grid">
+                <div class="loading">Loading items...</div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Post Item Modal -->
+    <div id="postModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Post an Item</h2>
+                <button class="close-btn" id="closePostModal">&times;</button>
+            </div>
+            <form id="postForm" class="post-form">
+                <div class="form-group">
+                    <label>Item Type *</label>
+                    <div class="radio-group">
+                        <label class="radio-label">
+                            <input type="radio" name="type" value="lost" required>
+                            <span>Lost</span>
+                        </label>
+                        <label class="radio-label">
+                            <input type="radio" name="type" value="found" required>
+                            <span>Found</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="itemName">Item Name *</label>
+                    <input type="text" id="itemName" required placeholder="e.g., Blue Water Bottle">
+                </div>
+                <div class="form-group">
+                    <label for="category">Category *</label>
+                    <select id="category" required>
+                        <option value="">Select a category</option>
+                        <option value="electronics">Electronics</option>
+                        <option value="books">Books & Stationery</option>
+                        <option value="clothing">Clothing</option>
+                        <option value="accessories">Accessories</option>
+                        <option value="keys">Keys & Cards</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="description">Description *</label>
+                    <textarea id="description" required placeholder="Provide details about the item..." rows="4"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="location">Location *</label>
+                    <input type="text" id="location" required placeholder="e.g., Library 2nd Floor">
+                </div>
+                <div class="form-group">
+                    <label for="contactEmail">Contact Email *</label>
+                    <input type="email" id="contactEmail" required placeholder="your.email@university.edu">
+                </div>
+                <div class="form-group">
+                    <label for="imageUpload">Upload Photo (Optional)</label>
+                    <div class="image-upload">
+                        <input type="file" id="imageUpload" accept="image/*">
+                        <div id="imagePreview" class="image-preview"></div>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" id="cancelPost">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Post Item</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Item Details Modal -->
+    <div id="detailsModal" class="modal">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h2>Item Details</h2>
+                <button class="close-btn" id="closeDetailsModal">&times;</button>
+            </div>
+            <div id="itemDetails" class="item-details"></div>
+        </div>
+    </div>
+
+    <!-- Message Modal -->
+    <div id="messageModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Send Message</h2>
+                <button class="close-btn" id="closeMessageModal">&times;</button>
+            </div>
+            <div id="messageThread" class="message-thread"></div>
+            <form id="messageForm" class="message-form">
+                <textarea id="messageInput" placeholder="Type your message..." rows="3" required></textarea>
+                <button type="submit" class="btn btn-primary">Send</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
