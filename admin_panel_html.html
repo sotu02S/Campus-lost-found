@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Campus Lost & Found</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="admin-style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@clerk/clerk-js@latest/dist/clerk.browser.js"></script>
+</head>
+<body>
+    <!-- Admin Header -->
+    <header class="admin-header">
+        <div class="container">
+            <div class="logo">
+                <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                    <rect x="6" y="6" width="20" height="20" rx="2" stroke="currentColor" stroke-width="2"/>
+                    <path d="M12 6V26M20 6V26M6 12H26M6 20H26" stroke="currentColor" stroke-width="2"/>
+                </svg>
+                <h1>Admin Dashboard</h1>
+            </div>
+            <div class="admin-user">
+                <div id="user-button"></div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Admin Sidebar -->
+    <div class="admin-layout">
+        <aside class="admin-sidebar">
+            <nav class="admin-nav">
+                <button class="admin-nav-item active" data-panel="dashboard">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                        <rect x="3" y="3" width="6" height="6" rx="1" stroke="currentColor" stroke-width="2"/>
+                        <rect x="11" y="3" width="6" height="6" rx="1" stroke="currentColor" stroke-width="2"/>
+                        <rect x="3" y="11" width="6" height="6" rx="1" stroke="currentColor" stroke-width="2"/>
+                        <rect x="11" y="11" width="6" height="6" rx="1" stroke="currentColor" stroke-width="2"/>
+                    </svg>
+                    Dashboard
+                </button>
+                <button class="admin-nav-item" data-panel="items">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                        <rect x="3" y="3" width="14" height="14" rx="2" stroke="currentColor" stroke-width="2"/>
+                        <path d="M7 7H13M7 10H13M7 13H10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                    All Items
+                </button>
+                <button class="admin-nav-item" data-panel="flagged">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                        <path d="M4 3V17M4 3L15 3L12 8L15 13H4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    Flagged Items
+                </button>
+                <button class="admin-nav-item" data-panel="users">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                        <circle cx="10" cy="7" r="3" stroke="currentColor" stroke-width="2"/>
+                        <path d="M4 17C4 14 6.5 12 10 12C13.5 12 16 14 16 17" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                    Users
+                </button>
+                <button class="admin-nav-item" data-panel="analytics">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                        <path d="M3 17L7 13L11 15L17 9M17 9V13M17 9H13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    Analytics
+                </button>
+                <button class="admin-nav-item" data-panel="settings">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                        <circle cx="10" cy="10" r="3" stroke="currentColor" stroke-width="2"/>
+                        <path d="M10 3V5M10 15V17M17 10H15M5 10H3M14.5 5.5L13 7M7 13L5.5 14.5M14.5 14.5L13 13M7 7L5.5 5.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                    Settings
+                </button>
+            </nav>
+            <div class="admin-sidebar-footer">
+                <a href="index.html" class="btn btn-secondary">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                        <path d="M8 5L3 10L8 15M3 10H17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    Back to App
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="admin-main">
+            <!-- Dashboard Panel -->
+            <div id="dashboard-panel" class="admin-panel active">
+                <div class="panel-header">
+                    <h2>Dashboard Overview</h2>
+                    <div class="date-filter">
+                        <select id="dateRange" class="filter-select">
+                            <option value="7">Last 7 Days</option>
+                            <option value="30">Last 30 Days</option>
+                            <option value="90">Last 90 Days</option>
+                            <option value="all">All Time</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Stats Cards -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: rgba(99, 102, 241, 0.2);">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                <rect x="4" y="4" width="16" height="16" rx="2" stroke="#6366f1" stroke-width="2"/>
+                            </svg>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-label">Total Items</div>
+                            <div class="stat-value" id="totalItems">0</div>
+                            <div class="stat-change positive">+12% from last month</div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: rgba(16, 185, 129, 0.2);">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                <path d="M20 6L9 17L4 12" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-label">Items Claimed</div>
+                            <div class="stat-value" id="claimedItems">0</div>
+                            <div class="stat-change positive">+8% from last month</div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: rgba(245, 158, 11, 0.2);">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                <circle cx="12" cy="12" r="8" stroke="#f59e0b" stroke-width="2"/>
+                                <path d="M12 8V12L15 15" stroke="#f59e0b" stroke-width="2" stroke-linecap="round"/>
+                            </svg>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-label">Pending Items</div>
+                            <div class="stat-value" id="pendingItems">0</div>
+                            <div class="stat-change negative">-3% from last month</div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: rgba(139, 92, 246, 0.2);">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                <path d="M17 21V19C17 16.8 15.2 15 13 15H5C2.8 15 1 16.8 1 19V21M13 7C13 9.2 11.2 11 9 11C6.8 11 5 9.2 5 7C5 4.8 6.8 3 9 3C11.2 3 13 4.8 13 7ZM23 21V19C23 17.1 21.7 15.5 20 15.1M16 3.1C17.7 3.5 19 5.1 19 7C19 8.9 17.7 10.5 16 10.9" stroke="#8b5cf6" stroke-width="2" stroke-linecap="round"/>
+                            </svg>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-label">Active Users</div>
+                            <div class="stat-value" id="activeUsers">0</div>
+                            <div class="stat-change positive">+15% from last month</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts Row -->
+                <div class="charts-row">
+                    <div class="chart-card">
+                        <h3>Items Over Time</h3>
+                        <canvas id="itemsChart"></canvas>
+                    </div>
+                    <div class="chart-card">
+                        <h3>Category Distribution</h3>
+                        <canvas id="categoryChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="activity-card">
+                    <h3>Recent Activity</h3>
+                    <div id="recentActivity" class="activity-list"></div>
+                </div>
+            </div>
+
+            <!-- All Items Panel -->
+            <div id="items-panel" class="admin-panel">
+                <div class="panel-header">
+                    <h2>All Items</h2>
+                    <div class="panel-actions">
+                        <input type="text" id="itemSearch" class="search-input" placeholder="Search items...">
+                        <button class="btn btn-primary" id="exportItems">
+                            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                <path d="M3 17V15M17 17V15M10 3V13M10 13L6 9M10 13L14 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            Export
+                        </button>
+                    </div>
+                </div>
+                <div id="itemsTable" class="data-table"></div>
+            </div>
+
+            <!-- Flagged Items Panel -->
+            <div id="flagged-panel" class="admin-panel">
+                <div class="panel-header">
+                    <h2>Flagged Items</h2>
+                    <span class="badge danger" id="flaggedCount">0</span>
+                </div>
+                <div id="flaggedItems" class="flagged-list"></div>
+            </div>
+
+            <!-- Users Panel -->
+            <div id="users-panel" class="admin-panel">
+                <div class="panel-header">
+                    <h2>User Management</h2>
+                    <div class="panel-actions">
+                        <input type="text" id="userSearch" class="search-input" placeholder="Search users...">
+                    </div>
+                </div>
+                <div id="usersTable" class="data-table"></div>
+            </div>
+
+            <!-- Analytics Panel -->
+            <div id="analytics-panel" class="admin-panel">
+                <div class="panel-header">
+                    <h2>Analytics & Insights</h2>
+                </div>
+                
+                <div class="analytics-grid">
+                    <div class="chart-card">
+                        <h3>Success Rate</h3>
+                        <div class="success-rate">
+                            <div class="rate-circle">
+                                <span id="successRate">0%</span>
+                            </div>
+                            <p>Items successfully claimed</p>
+                        </div>
+                    </div>
+                    
+                    <div class="chart-card">
+                        <h3>Average Response Time</h3>
+                        <div class="metric-large">
+                            <span id="avgResponseTime">0h</span>
+                            <p>Until first message</p>
+                        </div>
+                    </div>
+
+                    <div class="chart-card">
+                        <h3>Peak Activity Hours</h3>
+                        <canvas id="activityChart"></canvas>
+                    </div>
+
+                    <div class="chart-card">
+                        <h3>Top Categories</h3>
+                        <div id="topCategories" class="top-list"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings Panel -->
+            <div id="settings-panel" class="admin-panel">
+                <div class="panel-header">
+                    <h2>Settings</h2>
+                </div>
+                
+                <div class="settings-sections">
+                    <div class="settings-card">
+                        <h3>General Settings</h3>
+                        <div class="setting-item">
+                            <label>
+                                <input type="checkbox" id="autoApprove" checked>
+                                <span>Auto-approve new posts</span>
+                            </label>
+                        </div>
+                        <div class="setting-item">
+                            <label>
+                                <input type="checkbox" id="emailNotifications" checked>
+                                <span>Email notifications for flagged items</span>
+                            </label>
+                        </div>
+                        <div class="setting-item">
+                            <label>
+                                <input type="checkbox" id="allowAnonymous">
+                                <span>Allow anonymous posts</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="settings-card">
+                        <h3>Data Management</h3>
+                        <button class="btn btn-secondary">
+                            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                <path d="M3 17V15M17 17V15M10 3V13M10 13L6 9M10 13L14 9" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                            </svg>
+                            Export All Data
+                        </button>
+                        <button class="btn btn-secondary" style="margin-top: 0.5rem;">
+                            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                <path d="M10 3V13M10 3L6 7M10 3L14 7M3 15V17M17 15V17" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                            </svg>
+                            Import Data
+                        </button>
+                        <button class="btn btn-danger" style="margin-top: 1rem;">
+                            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                <path d="M3 5H17M8 5V3H12V5M8 9V15M12 9V15M5 5L6 17H14L15 5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                            </svg>
+                            Clear Old Data (90+ days)
+                        </button>
+                    </div>
+
+                    <div class="settings-card">
+                        <h3>Category Management</h3>
+                        <div id="categoryManager" class="category-list">
+                            <div class="category-item">
+                                <span>Electronics</span>
+                                <button class="icon-btn">✏️</button>
+                            </div>
+                            <div class="category-item">
+                                <span>Books & Stationery</span>
+                                <button class="icon-btn">✏️</button>
+                            </div>
+                            <div class="category-item">
+                                <span>Clothing</span>
+                                <button class="icon-btn">✏️</button>
+                            </div>
+                        </div>
+                        <button class="btn btn-primary" style="margin-top: 1rem;">
+                            + Add Category
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modals -->
+    <div id="itemDetailsModal" class="modal">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h2>Item Details</h2>
+                <button class="close-btn" onclick="closeModal('itemDetailsModal')">&times;</button>
+            </div>
+            <div id="adminItemDetails"></div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="admin-script.js"></script>
+</body>
+</html>
